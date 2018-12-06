@@ -53,13 +53,35 @@ plot(times, rec30)
 xlabel("time")
 ylabel("voltage")
 title('threshold = 30')
-threshold = FindThreshold(0.9756,a,d)
+threshold = FindThreshold(0.9756,a,d);
 
 %% Compute PSNR
-ratio = 1:0.5:100;
+ratio = (0.01:0.005:1)';
 psnr = ComputePSNRs(data,a,d,ratio);
+figure
+plot(ratio,psnr,'x')
+xlabel('compression ratio')
+ylabel('PSNR')
 
+%% Test Threshold
+threshold = FindThreshold(0.05,a,d);
+rec5 = reconstruction(a,d,threshold);
+figure
+%subplot(2,1,1)
+hold on
+plot(times, rec5)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 5')
+%subplot(2,1,2)
+threshold = FindThreshold(0.7,a,d);
+rec6 = reconstruction(a,d,threshold);
+plot(times, rec6)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 6')
 
+hold off
 function [a,D]=Haar1D(data)
     D = {};
     level = log2(length(data));
@@ -109,7 +131,7 @@ function PSNRs = ComputePSNRs(data,a,d,ratio)
     for i = 1:length(ratio)
        threshold = FindThreshold(ratio(i),a,d);
        rec = reconstruction(a,d,threshold);
-       MSE = sum((rec - data).^2)/length(data);
+       MSE = sum((rec - data).^2)./length(data);
        PSNR = 10*log10(1./MSE);
        PSNRs = [PSNRs, PSNR];
     end
