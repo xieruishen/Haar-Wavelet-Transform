@@ -1,6 +1,64 @@
 clear
 load BabyECGData;
-[a,d] = Haar1D([9,7,3,5]);
+data = HR;
+[a,d] = Haar1D(data);
+HRrec3 = ihaart(a,d,3);
+HRrec5 = ihaart(a,d,5);
+HRrec8 = ihaart(a,d,8);
+figure
+subplot(2,2,1)
+plot(times, HR)
+xlabel("time")
+ylabel("voltage")
+title('Original Signal')
+subplot(2,2,2)
+plot(times, HRrec3)
+xlabel("time")
+ylabel("voltage")
+title('Level 3 Compression')
+subplot(2,2,3)
+plot(times, HRrec5)
+xlabel("time")
+ylabel("voltage")
+title('Level 5 Compression')
+subplot(2,2,4)
+plot(times, HRrec8)
+xlabel("time")
+ylabel("voltage")
+title('Level 8')
+rec10 = reconstruction(a,d,10);
+
+%%
+figure
+subplot(2,2,1)
+plot(times, rec10)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 10')
+rec50 = reconstruction(a,d,50);
+subplot(2,2,2)
+plot(times, rec50)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 50')
+rec20 = reconstruction(a,d,20);
+subplot(2,2,3)
+plot(times, rec20)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 20')
+rec30 = reconstruction(a,d,30);
+subplot(2,2,4)
+plot(times, rec30)
+xlabel("time")
+ylabel("voltage")
+title('threshold = 30')
+threshold = FindThreshold(0.9756,a,d)
+
+%% Compute PSNR
+ratio = 1:0.5:100;
+psnr = ComputePSNRs(data,a,d,ratio);
+
 
 function [a,D]=Haar1D(data)
     D = {};
@@ -16,14 +74,43 @@ function [a,D]=Haar1D(data)
         data = a;
     end
 end
-
-function signal = InvHaar1D(a,d,level)
-    signal = zeros(length(d{1})*2);
-    index = length(signal);
-    signallength = length(d{1});
-    a_next = a;
-    d_next = d
-    for i = length(d):(level+1)
-        a_next = vertcat(1/sqrt(2)*(a_next - d_next),1/sqrt(2)*(a_next - d_next)
+function rec = InvHaar1D(a,d,level)
+    rec = [a,d,level];
+end
+function rec = reconstruction(a,D,threshold)
+    count = 0;
+    if abs(a) < threshold
+        a = 0;
+        count = count + 1;
+    end
+    for i = 1:length(D)
+        for j = 1:length(D{i})
+            if abs(D{i}(j)) < threshold
+                D{i}(j) = 0;
+                count = count + 1;
+            end
+        end
+    end
+    rec = ihaart(a,D);
+    count/(length(D{1})*2)
+end
+function threshold = FindThreshold(ratio,a,d)
+    data = [a];
+    for i=1:length(d)
+        for j = 1:length(d{i})
+            data = [data,d{i}(j)];
+        end
+    end
+    data_sort = sort(abs(data));
+    threshold = data_sort(ceil(ratio*length(data_sort)));
+end
+function PSNRs = ComputePSNRs(data,a,d,ratio)
+    PSNRs = [];
+    for i = 1:length(ratio)
+       threshold = FindThreshold(ratio(i),a,d);
+       rec = reconstruction(a,d,threshold);
+       MSE = sum((rec - data).^2)/length(data);
+       PSNR = 10*log10(1./MSE);
+       PSNRs = [PSNRs, PSNR];
     end
 end
