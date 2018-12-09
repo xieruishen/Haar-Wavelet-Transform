@@ -57,8 +57,7 @@ function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
     count/total
 end
 function [threshold,data_sort] = FindThreshold2D(a,h,v,d,ratio)
-    n = size(h{1},1)*2;
-    data = zeros(n,n);
+    data = zeros(1024,1024);
     data(1) = a;
     index = 2;
     for i=1:length(d)
@@ -97,5 +96,5 @@ function ratio = Compare(a,h,v,d, a_rec,h_rec,v_rec,d_rec)
     end
     coef_count = sum(coef(:) ~= 0); % number nonzero before compress
     coef_rec_count = sum(coef_rec(:) ~= 0); % number nonzero after compress 
-    ratio = (coef_count - coef_rec_count)/coef_count;
+    ratio = abs((coef_rec_count/coef_count);
 end

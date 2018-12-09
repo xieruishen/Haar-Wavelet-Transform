@@ -28,7 +28,7 @@ ylabel("voltage")
 title('Level 8')
 rec10 = reconstruction(a,d,10);
 
-%%
+%% reconstruction at different threshold
 figure
 subplot(2,2,1)
 plot(times, rec10)
@@ -57,15 +57,15 @@ threshold = FindThreshold(0.9756,a,d);
 
 %% Compute PSNR
 ratio = (0.01:0.005:1)';
-psnr = ComputePSNRs(data,a,d,ratio);
+psnr = ComputePSNRs1D(data,a,d,ratio);
 figure
 plot(ratio,psnr,'x')
 xlabel('compression ratio')
 ylabel('PSNR')
 
 %% Test Threshold
-threshold = FindThreshold(0.05,a,d);
-rec5 = reconstruction(a,d,threshold);
+threshold = FindThreshold1D(0.05,a,d);
+rec5 = reconstruction1D(a,d,threshold);
 figure
 %subplot(2,1,1)
 hold on
@@ -74,8 +74,8 @@ xlabel("time")
 ylabel("voltage")
 title('threshold = 5')
 %subplot(2,1,2)
-threshold = FindThreshold(0.7,a,d);
-rec6 = reconstruction(a,d,threshold);
+threshold = FindThreshold1D(0.7,a,d);
+rec6 = reconstruction1D(a,d,threshold);
 plot(times, rec6)
 xlabel("time")
 ylabel("voltage")
@@ -99,7 +99,7 @@ end
 function rec = InvHaar1D(a,d,level)
     rec = [a,d,level];
 end
-function rec = reconstruction(a,D,threshold)
+function rec = reconstruction1D(a,D,threshold)
     count = 0;
     if abs(a) < threshold
         a = 0;
@@ -116,7 +116,7 @@ function rec = reconstruction(a,D,threshold)
     rec = ihaart(a,D);
     count/(length(D{1})*2)
 end
-function threshold = FindThreshold(ratio,a,d)
+function threshold = FindThreshold1D(ratio,a,d)
     data = [a];
     for i=1:length(d)
         for j = 1:length(d{i})
@@ -126,7 +126,7 @@ function threshold = FindThreshold(ratio,a,d)
     data_sort = sort(abs(data));
     threshold = data_sort(ceil(ratio*length(data_sort)));
 end
-function PSNRs = ComputePSNRs(data,a,d,ratio)
+function PSNRs = ComputePSNRs1D(data,a,d,ratio)
     PSNRs = [];
     for i = 1:length(ratio)
        threshold = FindThreshold(ratio(i),a,d);
