@@ -35,18 +35,18 @@ grayimage = rgb2gray(image);
 % xlabel('compression ratio')
 % ylabel('MSE')
 %% Show compressed images from 0 - 100% ratio
-ratio = (0.01:0.005:0.9999)';
-ratio = [ratio; 0.9960; 0.9970;0.9980;0.9990;0.9995;0.9997;0.9999];
-figure
-pause(5);
-for i = 1:length(ratio)
-    [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
-    rec = reconstruction2D(a,h,v,d,threshold);
-    imshow(uint8(rec));
-    titleText = join(['Compressed Ratio =',string(ratio(i)*100),'%']);
-    title(titleText);
-    pause(0);
-end
+% ratio = (0.01:0.005:0.9999)';
+% ratio = [ratio; 0.9960; 0.9970;0.9980;0.9990;0.9995;0.9997;0.9999];
+% figure
+% pause(5);
+% for i = 1:length(ratio)
+%     [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
+%     rec = reconstruction2D(a,h,v,d,threshold);
+%     imshow(uint8(rec));
+%     titleText = join(['Compressed Ratio =',string(ratio(i)*100),'%']);
+%     title(titleText);
+%     pause(0);
+% end
 %% Compute ssim
 % ratio = (0.01:0.005:0.9999)';
 % ssim = ComputeSSIMs2D(double(grayimage),a,h,v,d,ratio);
@@ -57,6 +57,10 @@ end
 % hold off
 % xlabel('Compression Ratio(%)')
 % ylabel('SSIM')
+%% HHLL plot
+[a,h,v,d] = haart2(grayimage,1);
+[a2,h2,v2,d2] = haart2(a,1);
+imshow(uint8(a2))
 
 function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
     count = 0;
