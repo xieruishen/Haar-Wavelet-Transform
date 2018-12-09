@@ -35,16 +35,23 @@ grayimage = rgb2gray(image);
 % xlabel('compression ratio')
 % ylabel('MSE')
 %% Show compressed images from 0 - 100% ratio
+% ratio = (0.01:0.005:0.9999)';
+% figure
+% for i = 1:length(ratio)
+%     [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
+%     rec = reconstruction2D(a,h,v,d,threshold);
+%     imshow(uint8(rec));
+%     titleText = join(['Compressed Ratio =',string(ratio(i)*100),'%']);
+%     title(titleText);
+%     pause(0);
+% end
+%% Compute ssim
 ratio = (0.01:0.005:0.9999)';
+ssim = ComputeSSIMs2D(double(grayimage),a,h,v,d,ratio);
 figure
-for i = 1:length(ratio)
-    [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
-    rec = reconstruction2D(a,h,v,d,threshold);
-    imshow(uint8(rec));
-    titleText = join(['Compressed Ratio =',string(ratio(i)*100),'%']);
-    title(titleText);
-    pause(0);
-end
+plot(ratio,ssim,'x')
+xlabel('compression ratio')
+ylabel('SSIM')
 
 function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
     count = 0;
@@ -111,6 +118,15 @@ function [PSNRs,MSEs] = ComputePSNRs2D(data,a,h,v,d,ratio)
        PSNR = 10*log10(1./MSE);
        MSEs(i) = MSE;
        PSNRs(i) = PSNR;
+    end
+end
+function SSIMs = ComputeSSIMs2D(data,a,h,v,d,ratio)
+    SSIMs = zeros(length(ratio),1);
+    for i = 1:length(ratio)
+       [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
+       rec = reconstruction2D(a,h,v,d,threshold);
+       SSIM = ssim(rec,data);
+       SSIMs(i) = SSIM;
     end
 end
 function ratio = Compare(a,h,v,d, a_rec,h_rec,v_rec,d_rec)
