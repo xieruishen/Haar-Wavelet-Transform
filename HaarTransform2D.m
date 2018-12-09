@@ -1,20 +1,40 @@
-image = imread('cat.png');
+image = imread('cheetah.png');
 grayimage = rgb2gray(image);
 imshow(grayimage)
+title('threshold = 0')
 [a,h,v,d] = haart2(grayimage);
 
 %% Test Different Threshold
-[threshold, data_sort] = FindThreshold2D(a,h,v,d,0.1);
+[threshold, data_sort] = FindThreshold2D(a,h,v,d,0.8);
 [rec5,a_rec5,h_rec5,v_rec5,d_rec5] = reconstruction2D(a,h,v,d,threshold);
-ratio = Compare(a,h,v,d, a_rec5,h_rec5,v_rec5,d_rec5)
+ratio5 = Compare(a,h,v,d, a_rec5,h_rec5,v_rec5,d_rec5);
 figure
 imshow(uint8(rec5))
-title('threshold = 5')
+title('threshold = 80')
+[threshold, data_sort] = FindThreshold2D(a,h,v,d,0.5);
+[rec9,a_rec9,h_rec9,v_rec9,d_rec9] = reconstruction2D(a,h,v,d,threshold);
+ratio9 = Compare(a,h,v,d, a_rec9,h_rec9,v_rec9,d_rec9);
+figure
+imshow(uint8(rec9))
+title('threshold = 50')
 % threshold = FindThreshold2D(a,h,v,d,0.9)
 % rec70 = reconstruction2D(a,h,v,d,threshold);
 % figure
 % imshow(rec70)
 % title('threshold = 70')
+
+%% Compute PSNR
+ratio = (0.01:0.005:0.9999)';
+[psnr,mse] = ComputePSNRs2D(double(grayimage),a,h,v,d,ratio);
+figure
+plot(ratio,psnr,'x')
+xlabel('compression ratio')
+ylabel('PSNR')
+figure
+plot(ratio,mse,'x')
+xlabel('compression ratio')
+ylabel('MSE')
+
 
 function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
     count = 0;
@@ -71,14 +91,16 @@ function [threshold,data_sort] = FindThreshold2D(a,h,v,d,ratio)
     start_index = sum(data_sort==0);
     threshold = data_sort(start_index + ceil(ratio*(length(data_sort)-start_index)));
 end
-function PSNRs = ComputePSNRs2D(data,a,h,v,d,ratio)
-    PSNRs = [];
+function [PSNRs,MSEs] = ComputePSNRs2D(data,a,h,v,d,ratio)
+    PSNRs = zeros(length(ratio),1);
+    MSEs = zeros(length(ratio),1);
     for i = 1:length(ratio)
-       threshold, data_sort = FindThreshold2D(a,h,v,d,ratio(i));
+       [threshold, data_sort] = FindThreshold2D(a,h,v,d,ratio(i));
        rec = reconstruction2D(a,h,v,d,threshold);
        MSE = sum(sum((rec - data).^2))./(size(data,1)*size(data,2));
        PSNR = 10*log10(1./MSE);
-       PSNRs = [PSNRs, PSNR];
+       MSEs(i) = MSE;
+       PSNRs(i) = PSNR;
     end
 end
 function ratio = Compare(a,h,v,d, a_rec,h_rec,v_rec,d_rec)
