@@ -49,8 +49,8 @@ grayimage = rgb2gray(image);
 ratio = (0.01:0.005:0.9999)';
 ssim = ComputeSSIMs2D(double(grayimage),a,h,v,d,ratio);
 figure
-plot(ratio,ssim,'rx')
-xlabel('Compression Ratio(%)')
+plot(ratio,ssim,'x')
+xlabel('Compression rRatio')
 ylabel('SSIM')
 
 function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
