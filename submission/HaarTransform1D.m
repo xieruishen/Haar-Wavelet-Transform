@@ -64,19 +64,21 @@ xlabel('compression ratio')
 ylabel('PSNR')
 
 figure
-plot(ratio,mse,'o')
+plot(ratio,mse,'x')
 xlabel('compression ratio')
 ylabel('MSE')
 
 figure
-plot(ratio,ssim,'-')
+plot(ratio,ssim,'x')
 xlabel('compression ratio')
 ylabel('SSIM')
 
 %% Function to obtain approximation and detail coefficients for a 1D signal
-% data: a 1D array signal
-% a: approximation coefficient
-% D: object that stores details coefficient at all levels
+% INPUTS 
+%   data: a 1D array signal
+% OUTPUTS
+%   a: approximation coefficient
+%   D: object that stores details coefficient at all levels
 function [a,D]=Haar1D(data)
     D = {}; % D stores the detail coefficients of all levels
     level = log2(length(data)); % The max level that can be obtained
@@ -91,7 +93,14 @@ function [a,D]=Haar1D(data)
         data = a; % Update the data used for the next level
     end
 end
-function rec = reconstruction1D(a,D,threshold)
+% Function to reconstruct a 1D signal given a specific threshold
+% INPUTS
+%   a: approximation coefficient
+%   D: object that stores details coefficient at all levels
+%   threshold: coefficients smaller than threshold will be set to zero
+% OUTPUTS
+%   rec: reconstructed signal in 1D
+function rec = reconstruction(a,D,threshold)
     count = 0;
     if abs(a) < threshold
         a = 0;
@@ -106,19 +115,36 @@ function rec = reconstruction1D(a,D,threshold)
         end
     end
     rec = ihaart(a,D);
-    count/(length(D{1})*2)
+    compression_rate = count/(length(D{1})*2)
 end
-function threshold = FindThreshold1D(ratio,a,d)
+% Function to find a desired threshold given a specific compression ratio
+% INPUTS
+%   ratio: desired compression ratio
+%   a: approximation coefficient
+%   D: object that stores details coefficient at all levels
+% OUTPUTS
+%   threshold: desired threshold value
+function threshold = FindThreshold(ratio,a,D)
     data = [a];
-    for i=1:length(d)
-        for j = 1:length(d{i})
-            data = [data,d{i}(j)];
+    for i=1:length(D)
+        for j = 1:length(D{i})
+            data = [data,D{i}(j)];
         end
     end
     data_sort = sort(abs(data));
     threshold = data_sort(ceil(ratio*length(data_sort)));
 end
-function [PSNRs, MSEs, SSIMs] = ComputePSNRs1D(data,a,d,ratio)
+% Function to compute PSNR, MSE and SSIM given a range of ratios
+% INPUTS
+%   data: a 1D input signal 
+%   ratio: a 1D array of compression ratio
+%   a: approximation coefficient
+%   D: object that stores details coefficient at all levels
+% OUTPUTS
+%   PSNRs: the corresponding PSNR values
+%   MSEs: the corresponding PSNR values
+%   SSIMs: the corresponding PSNR values
+function [PSNRs, MSEs, SSIMs] = ComputePSNRs1D(data,ratio,a,d)
     PSNRs = zeros(length(ratio),1);
     MSEs = zeros(length(ratio),1);
     SSIMs = zeros(length(ratio),1);
