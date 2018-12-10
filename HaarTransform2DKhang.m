@@ -60,7 +60,7 @@ grayimage = rgb2gray(image);
 %% HHLL plot
 [a,h,v,d] = haart2(grayimage,1);
 [a2,h2,v2,d2] = haart2(a,1);
-imshow(uint8(a2))
+imshow(uint8(a))
 
 function [rec,a,h,v,d] = reconstruction2D(a,h,v,d,threshold)
     count = 0;
