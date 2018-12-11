@@ -1,5 +1,5 @@
 clear
-load BabyECGData; % MATLAB R2018
+load 'BabyECGData.mat';
 data = HR;
 [a,d] = Haar1D(data);
 HRrec3 = ihaart(a,d,3);
@@ -56,7 +56,7 @@ title('threshold = 30')
 
 %% Compute and plot PSNR, MSE and SSIM 
 ratio = (0.01:0.005:1)';
-[psnr, mse, ssim] = ComputePSNRs1D(data,a,d,ratio);
+[psnr, mse, ssim] = ComputePSNRs1D(data,ratio,a,d);
 
 figure
 plot(ratio,psnr,'x')
